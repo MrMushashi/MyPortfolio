@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, ArrowLeft } from 'lucide-react';
 
 export interface LyricLine {
   time: number; // in seconds
@@ -24,6 +24,7 @@ export interface IntroLyricsProps {
   trackName?: string;
   lyrics?: LyricLine[];
   onComplete?: () => void;
+  onAudioStageActiveChange?: (isActive: boolean) => void;
 }
 
 const BADGE_SIZE = 150;
@@ -53,6 +54,7 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
   trackName = 'SYSTEM_AUDIO',
   lyrics = DEFAULT_LYRICS,
   onComplete,
+  onAudioStageActiveChange,
 }) => {
   // Check if intro has already run in this browser session
   const [hasPlayed] = useState<boolean>(() => {
@@ -73,6 +75,75 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
   const [currentLineIndex, setCurrentLineIndex] = useState<number>(0);
   const [isLineExiting, setIsLineExiting] = useState<boolean>(false);
   const [needsTapToPlay, setNeedsTapToPlay] = useState<boolean>(false);
+
+  // Device detection: 'touch' for phone & iPad, 'laptop' for laptop/desktop
+  const [deviceCategory, setDeviceCategory] = useState<'laptop' | 'touch'>(() => {
+    if (typeof window !== 'undefined') {
+      const ua = navigator.userAgent || '';
+      const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isMobileUA = /iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      const hasCoarse = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+      const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const isMobileOrTabletWidth = window.innerWidth <= 1024;
+      return (isIPad || isMobileUA || (hasTouch && (hasCoarse || isMobileOrTabletWidth))) ? 'touch' : 'laptop';
+    }
+    return 'laptop';
+  });
+
+  useEffect(() => {
+    const updateDevice = () => {
+      if (typeof window === 'undefined') return;
+      const ua = navigator.userAgent || '';
+      const isIPad = /iPad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isMobileUA = /iPhone|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      const hasCoarse = typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches;
+      const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const isMobileOrTabletWidth = window.innerWidth <= 1024;
+      setDeviceCategory((isIPad || isMobileUA || (hasTouch && (hasCoarse || isMobileOrTabletWidth))) ? 'touch' : 'laptop');
+    };
+
+    window.addEventListener('resize', updateDevice);
+    window.addEventListener('orientationchange', updateDevice);
+    return () => {
+      window.removeEventListener('resize', updateDevice);
+      window.removeEventListener('orientationchange', updateDevice);
+    };
+  }, []);
+
+  // Broadcast audio stage active status to parent
+  useEffect(() => {
+    onAudioStageActiveChange?.(isOverlayMounted);
+  }, [isOverlayMounted, onAudioStageActiveChange]);
+
+  // Lock scroll completely on website while audio stage overlay is active
+  useEffect(() => {
+    if (isOverlayMounted) {
+      const prevBodyOverflow = document.body.style.overflow;
+      const prevHtmlOverflow = document.documentElement.style.overflow;
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+
+      const preventTouchScroll = (e: TouchEvent) => {
+        if ((e.target as HTMLElement)?.closest('button')) return;
+        e.preventDefault();
+      };
+
+      const preventWheelScroll = (e: WheelEvent) => {
+        if ((e.target as HTMLElement)?.closest('button')) return;
+        e.preventDefault();
+      };
+
+      window.addEventListener('touchmove', preventTouchScroll, { passive: false });
+      window.addEventListener('wheel', preventWheelScroll, { passive: false });
+
+      return () => {
+        document.body.style.overflow = prevBodyOverflow;
+        document.documentElement.style.overflow = prevHtmlOverflow;
+        window.removeEventListener('touchmove', preventTouchScroll);
+        window.removeEventListener('wheel', preventWheelScroll);
+      };
+    }
+  }, [isOverlayMounted]);
 
   // Persistent badge state
   const [isBadgeVisible, setIsBadgeVisible] = useState<boolean>(hasPlayed);
@@ -223,6 +294,7 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
         setIsBadgeVisible(true);
         setIsMigrating(false);
         setIsOverlayFading(false);
+        onAudioStageActiveChange?.(false);
         if (onComplete) {
           onComplete();
         }
@@ -236,24 +308,50 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
 
       setTimeout(() => {
         setIsOverlayMounted(false);
+        onAudioStageActiveChange?.(false);
         if (onComplete) {
           onComplete();
         }
       }, 900);
     },
-    [onComplete]
+    [onComplete, onAudioStageActiveChange]
   );
 
-  // Immediate skip action: pauses audio if playing and jumps straight to finished state
-  const handleSkip = useCallback(() => {
+  // Escape music action: stops/resets audio, dismisses the audio stage overlay, and restores full website interactivity
+  const handleEscapeMusic = useCallback(() => {
     const audio = audioRef.current;
     if (audio) {
       audio.pause();
+      audio.currentTime = 0;
     }
     setIsPlaying(false);
     hasCompletedRef.current = true;
     finishIntro(true);
   }, [finishIntro]);
+
+  const handleSkip = handleEscapeMusic;
+
+  // Hardware/Browser back button support for phones & iPads
+  useEffect(() => {
+    if (!isOverlayMounted) return;
+
+    try {
+      window.history.pushState({ audioStage: true }, '');
+    } catch {
+      // ignore
+    }
+
+    const handlePopState = () => {
+      if (isOverlayMounted) {
+        handleEscapeMusic();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [isOverlayMounted, handleEscapeMusic]);
 
   // User gesture handler when browser blocks initial autoplay
   const handleTapToBegin = useCallback(() => {
@@ -351,16 +449,18 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
     };
   }, [lyrics, hasPlayed, finishIntro]);
 
-  // 3. Escape key listener for instant skip
+  // 3. Escape key listener for laptop/desktop
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOverlayMounted) {
-        handleSkip();
+        e.preventDefault();
+        e.stopPropagation();
+        handleEscapeMusic();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSkip, isOverlayMounted]);
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [handleEscapeMusic, isOverlayMounted]);
 
   // Playback control toggler for persistent badge
   const togglePlay = (e?: React.MouseEvent) => {
@@ -454,18 +554,19 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
         <div
           role="dialog"
           aria-label="Site Intro Sequence"
+          aria-modal="true"
           onClick={needsTapToPlay ? handleTapToBegin : undefined}
-          className={`fixed inset-0 z-50 flex items-center justify-center select-none overflow-hidden transition-opacity duration-700 ${
+          className={`fixed inset-0 z-[100] flex items-center justify-center select-none overflow-hidden transition-opacity duration-700 pointer-events-auto ${
             isOverlayFading ? 'opacity-0 pointer-events-none' : 'opacity-100'
           } ${needsTapToPlay ? 'cursor-pointer' : ''}`}
           style={{
-            backgroundColor: 'rgba(6, 8, 11, 0.55)',
+            backgroundColor: 'rgba(6, 8, 11, 0.65)',
             backdropFilter: 'blur(22px) saturate(140%)',
             WebkitBackdropFilter: 'blur(22px) saturate(140%)',
           }}
         >
-          {/* Top terminal telemetry bar */}
-          <div className="absolute top-6 left-6 right-6 flex items-center justify-between text-xs font-mono text-zinc-400">
+          {/* Top terminal telemetry bar & device-tailored exit control */}
+          <div className="absolute top-6 left-4 sm:left-6 right-4 sm:right-6 flex items-center justify-between text-xs font-mono text-zinc-400 z-10">
             <div className="flex items-center space-x-2.5">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -476,17 +577,36 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
               </span>
             </div>
 
-            {/* Skip intro button (pauses audio & jumps straight to finished badge state) */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSkip();
-              }}
-              type="button"
-              className="text-[11px] font-mono text-zinc-400 hover:text-emerald-300 px-3.5 py-2 min-h-[44px] inline-flex items-center rounded-md border border-white/10 hover:border-emerald-500/40 bg-[#06080b]/60 backdrop-blur-sm transition-all cursor-pointer"
-            >
-              [ESC / SKIP]
-            </button>
+            {/* Device-adaptive Escape / Back button */}
+            {deviceCategory === 'touch' ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEscapeMusic();
+                }}
+                type="button"
+                className="text-xs font-mono text-emerald-400 hover:text-emerald-300 px-4 py-2 min-h-[44px] min-w-[44px] inline-flex items-center space-x-2 rounded-lg border border-emerald-500/40 hover:border-emerald-500/70 bg-[#06080b]/90 hover:bg-zinc-900 backdrop-blur-sm shadow-lg active:scale-95 transition-all cursor-pointer font-semibold"
+                aria-label="Back - Escape music"
+              >
+                <ArrowLeft className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>Back</span>
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleEscapeMusic();
+                }}
+                type="button"
+                className="text-xs font-mono text-zinc-300 hover:text-emerald-300 px-3.5 py-2 min-h-[44px] inline-flex items-center space-x-2 rounded-lg border border-white/10 hover:border-emerald-500/40 bg-[#06080b]/80 hover:bg-zinc-800 backdrop-blur-sm shadow-lg transition-all cursor-pointer group"
+                aria-label="Escape music (press Esc key)"
+              >
+                <kbd className="px-1.5 py-0.5 rounded border border-zinc-600 bg-zinc-800 text-[10px] font-bold text-emerald-400 group-hover:border-emerald-500/50 shadow-inner">
+                  ESC
+                </kbd>
+                <span>Escape Music</span>
+              </button>
+            )}
           </div>
 
           {/* Centered Lyric Stage */}
@@ -533,6 +653,32 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
               ))}
             </div>
 
+            {/* Device-tailored escape hint indicator */}
+            <div className="mt-8 flex items-center justify-center font-mono text-xs">
+              {deviceCategory === 'touch' ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEscapeMusic();
+                  }}
+                  className="inline-flex items-center space-x-2 px-4 py-2 min-h-[44px] rounded-full border border-emerald-500/30 bg-emerald-950/40 text-emerald-300 hover:text-emerald-200 hover:bg-emerald-950/60 transition-colors cursor-pointer active:scale-95"
+                  aria-label="Back - Escape music"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>Tap Back to escape music</span>
+                </button>
+              ) : (
+                <div className="inline-flex items-center space-x-2 text-zinc-400">
+                  <span>Press</span>
+                  <kbd className="px-2 py-0.5 rounded border border-white/20 bg-zinc-800 text-[11px] font-semibold text-emerald-400 shadow-sm">
+                    ESC
+                  </kbd>
+                  <span>to escape music</span>
+                </div>
+              )}
+            </div>
+
             {/* Minimal Tap-to-Begin Prompt when autoplay is blocked by browser policy */}
             {needsTapToPlay && (
               <div
@@ -540,7 +686,7 @@ export const IntroLyrics: React.FC<IntroLyricsProps> = ({
                   e.stopPropagation();
                   handleTapToBegin();
                 }}
-                className="mt-8 flex items-center space-x-2.5 px-4 py-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-mono text-xs uppercase tracking-wider cursor-pointer shadow-[0_0_18px_rgba(52,211,153,0.25)] hover:shadow-[0_0_24px_rgba(52,211,153,0.4)] transition-all animate-pulse"
+                className="mt-6 flex items-center space-x-2.5 px-4 py-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-mono text-xs uppercase tracking-wider cursor-pointer shadow-[0_0_18px_rgba(52,211,153,0.25)] hover:shadow-[0_0_24px_rgba(52,211,153,0.4)] transition-all animate-pulse"
               >
                 <Volume2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>[ TAP TO BEGIN AUDIO & SYNC ]</span>

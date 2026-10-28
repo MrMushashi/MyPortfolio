@@ -38,6 +38,7 @@ export default function App() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isTerminalModalOpen, setIsTerminalModalOpen] = useState(false);
   const [isKonamiDevMode, setIsKonamiDevMode] = useState(false);
+  const [isAudioStageActive, setIsAudioStageActive] = useState(false);
   const [bootReady, setBootReady] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -84,6 +85,11 @@ export default function App() {
   // Global keyboard shortcuts: Cmd+K, Backtick, Escape, and Konami Code
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // While audio stage is active, suppress global shortcuts
+      if (isAudioStageActive) {
+        return;
+      }
+
       // Cmd/Ctrl+K opens terminal anywhere on the page
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -204,53 +210,67 @@ export default function App() {
       <TerminalBootScreen onComplete={() => setBootReady(true)} />
 
       {/* Intro Lyrics Sequence & Persistent Audio Player (plays after boot sequence completes) */}
-      {bootReady && <IntroLyrics trackSrc="/track.mp3" />}
+      {bootReady && (
+        <IntroLyrics
+          trackSrc="/track.mp3"
+          onAudioStageActiveChange={setIsAudioStageActive}
+        />
+      )}
 
-      <ThemeTransitionWave />
-      {/* Scroll Depth Monospace Progress Bar */}
-      <ScrollProgressBar />
+      {/* Website content wrapper - temporarily non-interactive while the audio stage is active */}
+      <div
+        className={`w-full max-w-full transition-all duration-300 ${
+          isAudioStageActive ? 'pointer-events-none select-none' : ''
+        }`}
+        aria-hidden={isAudioStageActive}
+        inert={isAudioStageActive ? true : undefined}
+      >
+        <ThemeTransitionWave />
+        {/* Scroll Depth Monospace Progress Bar */}
+        <ScrollProgressBar />
 
-      {/* Top Fixed Navigation */}
-      <Navbar
-        onOpenResume={() => setIsResumeOpen(true)}
-        onOpenTerminal={() => setIsTerminalModalOpen(true)}
-      />
-
-      {/* Main Content Layout */}
-      <main id="main-content" className="w-full max-w-full overflow-x-hidden">
-        {/* Hero Section */}
-        <Hero
+        {/* Top Fixed Navigation */}
+        <Navbar
+          onOpenResume={() => setIsResumeOpen(true)}
           onOpenTerminal={() => setIsTerminalModalOpen(true)}
-          onOpenResume={() => setIsResumeOpen(true)}
         />
 
-        {/* About & Story Section */}
-        <About />
+        {/* Main Content Layout */}
+        <main id="main-content" className="w-full max-w-full overflow-x-hidden">
+          {/* Hero Section */}
+          <Hero
+            onOpenTerminal={() => setIsTerminalModalOpen(true)}
+            onOpenResume={() => setIsResumeOpen(true)}
+          />
 
-        {/* Projects Section (Themed per-card: AETHOS, INKWELL paper insert, ROOTCAUSE In The Grind) */}
-        <Projects />
+          {/* About & Story Section */}
+          <About />
 
-        {/* Embedded Interactive CLI Shell */}
-        <InteractiveTerminal
-          onOpenResume={() => setIsResumeOpen(true)}
+          {/* Projects Section (Themed per-card: AETHOS, INKWELL paper insert, ROOTCAUSE In The Grind) */}
+          <Projects />
+
+          {/* Embedded Interactive CLI Shell */}
+          <InteractiveTerminal
+            onOpenResume={() => setIsResumeOpen(true)}
+            onNavigate404={() => navigate('/404')}
+          />
+
+          {/* Cloud Guestbook & Collaboration Notes (Firebase Auth & Firestore) */}
+          <GuestbookSection />
+
+          {/* Contact Section */}
+          <Contact
+            onOpenResume={() => setIsResumeOpen(true)}
+            onNotify={showNotification}
+          />
+        </main>
+
+        {/* Footer */}
+        <Footer
           onNavigate404={() => navigate('/404')}
+          onOpenTerminal={() => setIsTerminalModalOpen(true)}
         />
-
-        {/* Cloud Guestbook & Collaboration Notes (Firebase Auth & Firestore) */}
-        <GuestbookSection />
-
-        {/* Contact Section */}
-        <Contact
-          onOpenResume={() => setIsResumeOpen(true)}
-          onNotify={showNotification}
-        />
-      </main>
-
-      {/* Footer */}
-      <Footer
-        onNavigate404={() => navigate('/404')}
-        onOpenTerminal={() => setIsTerminalModalOpen(true)}
-      />
+      </div>
 
       {/* Floating System Toast */}
       {notification && (

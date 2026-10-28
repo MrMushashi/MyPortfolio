@@ -35,6 +35,8 @@ const ALL_COMMANDS = [
   'fullscreen',
   'minimize',
   'exit',
+  'intro',
+  'audiostage',
 ];
 
 export const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({
@@ -516,6 +518,22 @@ export const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({
               <div>• Private Philosophy: <em className="text-zinc-200">"Read the disassembly before reading the opinion. Keep latency zero."</em></div>
               <div>• Easter Egg: <span className="text-amber-400 font-bold">30 Extra Lives Granted</span>. Type <span className="text-cyan-300 font-semibold">'skills'</span> or <span className="text-cyan-300 font-semibold">'pgp'</span> for raw intel.</div>
             </div>
+          </div>
+        );
+        break;
+
+      case 'audiostage':
+      case 'intro':
+      case 'music':
+        try {
+          sessionStorage.removeItem('introPlayed');
+        } catch {
+          // ignore
+        }
+        window.location.reload();
+        resultOutput = (
+          <div className="text-emerald-400 font-mono text-xs">
+            [AUDIO_STAGE] Triggering audio stage sequence...
           </div>
         );
         break;
