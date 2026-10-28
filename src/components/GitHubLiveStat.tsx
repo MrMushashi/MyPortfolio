@@ -24,7 +24,7 @@ export const GitHubLiveStat: React.FC = () => {
       try {
         setLoading(true);
         // Fetch user data
-        const userRes = await fetch('https://api.github.com/users/vedwebsites-eng', {
+        const userRes = await fetch('https://api.github.com/users/MrMushashi', {
           headers: { Accept: 'application/vnd.github.v3+json' },
         });
 
@@ -35,14 +35,14 @@ export const GitHubLiveStat: React.FC = () => {
 
         // Fetch latest updated repository
         const repoRes = await fetch(
-          'https://api.github.com/users/vedwebsites-eng/repos?sort=updated&per_page=1',
+          'https://api.github.com/users/MrMushashi/repos?sort=updated&per_page=1',
           {
             headers: { Accept: 'application/vnd.github.v3+json' },
           }
         );
 
         let latestRepoName = 'AETHOS';
-        let latestRepoUrl = 'https://github.com/vedwebsites-eng';
+        let latestRepoUrl = 'https://github.com/MrMushashi';
         let latestRepoLanguage = 'TypeScript';
         let latestRepoUpdated = new Date().toISOString();
 
@@ -58,9 +58,9 @@ export const GitHubLiveStat: React.FC = () => {
 
         if (isMounted) {
           setStats({
-            login: userData.login || 'vedwebsites-eng',
+            login: userData.login || 'MrMushashi',
             avatarUrl: userData.avatar_url || '',
-            profileUrl: userData.html_url || 'https://github.com/vedwebsites-eng',
+            profileUrl: userData.html_url || 'https://github.com/MrMushashi',
             publicRepos: typeof userData.public_repos === 'number' ? userData.public_repos : 3,
             latestRepoName,
             latestRepoUrl,

@@ -56,7 +56,7 @@ Vedant Sattegiri Patil
 Student-Builder & Security Researcher
 Location: Pune, Maharashtra, India
 Email: veddoesai@proton.me
-GitHub: https://github.com/vedwebsites-eng
+GitHub: https://github.com/MrMushashi
 
 SUMMARY:
 15-year-old self-taught builder and security researcher based in Pune. Blending an offensive cybersecurity mindset with modern AI system development and software engineering. Passionate about uncovering edge-case vulnerabilities, creating developer tooling, and educating builders through high-signal technical content.

@@ -72,7 +72,7 @@ async function generateResumePdf() {
   });
   cursorY -= 14;
 
-  const contactLine = 'Location: Pune, Maharashtra, India   •   Email: veddoesai@proton.me   •   GitHub: https://github.com/vedwebsites-eng';
+  const contactLine = 'Location: Pune, Maharashtra, India   •   Email: veddoesai@proton.me   •   GitHub: https://github.com/MrMushashi';
   page.drawText(contactLine, {
     x: marginX,
     y: cursorY,
@@ -267,7 +267,7 @@ async function generateResumePdf() {
     thickness: 0.5,
     color: colorDivider,
   });
-  page.drawText('Vedant Sattegiri Patil  •  Curriculum Vitae  •  github.com/vedwebsites-eng', {
+  page.drawText('Vedant Sattegiri Patil  •  Curriculum Vitae  •  github.com/MrMushashi', {
     x: marginX,
     y: 22,
     size: 7.5,

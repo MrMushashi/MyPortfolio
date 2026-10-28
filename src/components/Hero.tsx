@@ -62,19 +62,6 @@ export const Hero: React.FC<HeroProps> = React.memo(({ onOpenTerminal, onOpenRes
       <div className="absolute inset-0 bg-grid-pattern pointer-events-none opacity-60" />
 
       <div className="relative max-w-5xl mx-auto w-full z-10">
-        {/* Terminal Header Prompt Bar */}
-        <div
-          id="hero-terminal-badge"
-          className="inline-flex items-center space-x-2.5 py-1 sm:py-1.5 font-mono text-xs text-zinc-400 mb-2 sm:mb-5"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-zinc-400">host:</span>
-          <span className="text-zinc-200">pune-node-01</span>
-          <span className="text-zinc-500">|</span>
-          <span className="text-zinc-400">status:</span>
-          <span className="text-emerald-400">active_researcher</span>
-        </div>
-
         {/* Name in elegant Playfair Display + Moniker */}
         <div className="space-y-1 sm:space-y-3 mb-2 sm:mb-5">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -113,9 +100,7 @@ export const Hero: React.FC<HeroProps> = React.memo(({ onOpenTerminal, onOpenRes
               <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f56]/80" />
               <span className="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]/80" />
               <span className="w-2.5 h-2.5 rounded-full bg-[#27c93f]/80" />
-              <span className="ml-2 text-zinc-300">bash — 80x24</span>
             </div>
-            <div className="text-zinc-400 hidden sm:block">utf-8 • zsh</div>
           </div>
 
           {/* Shell prompt & typed sentence */}

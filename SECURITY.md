@@ -17,7 +17,7 @@ Only the latest version on the `main` branch and the live site at [vedantbuilds.
 
 Use one of these private channels:
 
-1. **GitHub private report (preferred):** go to the [Security tab](https://github.com/vedwebsites-eng/MyPortfolio/security/advisories/new) and choose "Report a vulnerability".
+1. **GitHub private report (preferred):** go to the [Security tab](https://github.com/MrMushashi/MyPortfolio/security/advisories/new) and choose "Report a vulnerability".
 2. **Email:** veddoesai@proton.me with the subject `[SECURITY] MyPortfolio`.
    For sensitive details, you can encrypt with my PGP key. Fingerprint: `9B2F E74A C190 442D 81A3 E518 70B2 3C8F 61D9 4AA1`.
 

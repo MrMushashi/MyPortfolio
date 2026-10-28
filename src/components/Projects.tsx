@@ -165,7 +165,7 @@ export const Projects: React.FC = React.memo(() => {
                 {/* Links */}
                 <div className="pt-4 flex items-center space-x-4 font-mono text-xs">
                   <a
-                    href="https://github.com/vedwebsites-eng"
+                    href="https://github.com/MrMushashi"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center space-x-1.5 text-[#FF4500] hover:text-amber-400 transition-colors cursor-pointer"
@@ -382,7 +382,7 @@ export const Projects: React.FC = React.memo(() => {
                   {/* Links */}
                   <div className="pt-4 flex items-center space-x-4 font-mono text-xs">
                     <a
-                      href="https://github.com/vedwebsites-eng"
+                      href="https://github.com/MrMushashi"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center space-x-1.5 text-rose-600 hover:text-rose-700 transition-colors font-medium cursor-pointer"
@@ -586,7 +586,7 @@ export const Projects: React.FC = React.memo(() => {
           </div>
         </div>
 
-        {/* Live GitHub Stats Pulse for @vedwebsites-eng */}
+        {/* Live GitHub Stats Pulse for @MrMushashi */}
         <GitHubLiveStat />
       </div>
     </section>

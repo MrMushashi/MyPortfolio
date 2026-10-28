@@ -3,8 +3,8 @@ import { Project, SkillCategory } from '../types';
 export const PERSONAL_INFO = {
   name: 'Vedant Sattegiri Patil',
   handle: 'VEX',
-  githubUsername: 'vedwebsites-eng',
-  githubUrl: 'https://github.com/vedwebsites-eng',
+  githubUsername: 'MrMushashi',
+  githubUrl: 'https://github.com/MrMushashi',
   email: 'veddoesai@proton.me',
   personalEmail: 'veddoesai@proton.me',
   altEmail: 'vedsp02@gmail.com',
@@ -45,7 +45,7 @@ export const PROJECTS: Project[] = [
     ],
     techStack: ['React 19', 'TypeScript', 'Tailwind CSS', 'AI Agent System', 'Web Storage API', 'Web Audio Synth'],
     links: [
-      { label: 'GitHub Repository', url: 'https://github.com/vedwebsites-eng/aethos', isExternal: true },
+      { label: 'GitHub Repository', url: 'https://github.com/MrMushashi/aethos', isExternal: true },
       { label: 'Architecture Docs', url: '#aethos-preview', isExternal: false },
     ],
     stats: [
@@ -99,7 +99,7 @@ export const PROJECTS: Project[] = [
     ],
     techStack: ['React', 'TypeScript', 'Tailwind CSS', 'Markdown Engine', 'LocalStorage API'],
     links: [
-      { label: 'GitHub Repository', url: 'https://github.com/vedwebsites-eng/inkwell', isExternal: true },
+      { label: 'GitHub Repository', url: 'https://github.com/MrMushashi/inkwell', isExternal: true },
       { label: 'Try Note Canvas', url: '#inkwell-preview', isExternal: false },
     ],
     stats: [
@@ -156,7 +156,7 @@ export const RESUME_DATA = {
   location: 'Pune, Maharashtra, India',
   email: 'veddoesai@proton.me',
   workEmail: 'veddoesai@proton.me',
-  github: 'https://github.com/vedwebsites-eng',
+  github: 'https://github.com/MrMushashi',
   summary:
     '15-year-old self-taught builder and security researcher based in Pune. Blending an offensive cybersecurity mindset with modern AI system development and software engineering. Passionate about uncovering edge-case vulnerabilities, creating developer tooling, and educating builders through high-signal technical content.',
   education: [

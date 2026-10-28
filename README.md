@@ -42,8 +42,8 @@ Portfolio of **Vedant Sattegiri Patil**, a student builder from Pune, India, wor
 
 | Project | What it is |
 | --- | --- |
-| [AETHOS](https://github.com/vedwebsites-eng/AETHOSGAMMA) | Gamified self-improvement app: XP levels, habits, journaling and an AI coach |
-| [Inkwell](https://github.com/vedwebsites-eng/INKWELL) | Distraction-free typographic note engine |
+| [AETHOS](https://github.com/MrMushashi/AETHOSGAMMA) | Gamified self-improvement app: XP levels, habits, journaling and an AI coach |
+| [Inkwell](https://github.com/MrMushashi/INKWELL) | Distraction-free typographic note engine |
 | [RootCause](https://www.youtube.com/@imrootcause) | Faceless tech and cybersecurity short-form video channel |
 
 ## Tech stack
@@ -77,7 +77,7 @@ All text content lives in `src/data/portfolioData.ts`. Edit that file to update 
 Requirements: Node.js 20+ (or Bun).
 
 ```bash
-git clone https://github.com/vedwebsites-eng/MyPortfolio.git
+git clone https://github.com/MrMushashi/MyPortfolio.git
 cd MyPortfolio
 npm install
 cp .env.example .env
@@ -106,7 +106,7 @@ Firebase web config lives in `firebase-applet-config.json`. These values are pub
 
 - Email: veddoesai@proton.me
 - Website: [vedantbuilds.vercel.app](https://vedantbuilds.vercel.app)
-- GitHub: [@vedwebsites-eng](https://github.com/vedwebsites-eng)
+- GitHub: [@MrMushashi](https://github.com/MrMushashi)
 - YouTube: [RootCause](https://www.youtube.com/@imrootcause)
 
 ## License
